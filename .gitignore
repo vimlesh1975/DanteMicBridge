@@ -1,0 +1,5 @@
+obj/
+[Bb]in/
+!DanteMicBridge/bin/Debug/net8.0-windows/*
+*.user
+.vs/

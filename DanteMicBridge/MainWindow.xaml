@@ -1,0 +1,295 @@
+<Window x:Class="DanteMicBridge.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Dante Mic Bridge - Audinate DAL Audio Transmitter" 
+        Height="740" Width="1020"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B0E14"
+        Foreground="#ECEFF4"
+        FontFamily="Segoe UI, Segoe UI Variable, Inter, sans-serif">
+
+    <Window.Resources>
+        <!-- Modern Card Style -->
+        <Style x:Key="CardPanel" TargetType="Border">
+            <Setter Property="Background" Value="#151922"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#252B3B"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+
+        <Style x:Key="HeaderTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#7E8B9B"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Custom Solid Colored Level Meter -->
+        <Style x:Key="VuMeterStyle" TargetType="ProgressBar">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="#10131A" CornerRadius="4" BorderBrush="#202636" BorderThickness="1">
+                            <Grid x:Name="TemplateRoot">
+                                <Border x:Name="PART_Track" />
+                                <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="3">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#00E676" Offset="0.0"/>
+                                            <GradientStop Color="#76FF03" Offset="0.6"/>
+                                            <GradientStop Color="#FFEA00" Offset="0.85"/>
+                                            <GradientStop Color="#FF1744" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Action Button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#1A8CD8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#005B99"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#2A2F3D"/>
+                                <Setter Property="Foreground" Value="#5C6479"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="StopButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#D32F2F"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#E53935"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#B71C1C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#2A2F3D"/>
+                                <Setter Property="Foreground" Value="#5C6479"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="170"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Header Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#007ACC" CornerRadius="3" Width="8" Height="22" Margin="0,0,10,0"/>
+                    <TextBlock Text="AUDINATE DANTE APPLICATION LIBRARY (DAL)" FontSize="11" FontWeight="Bold" Foreground="#00A3FF" VerticalAlignment="Center"/>
+                    <Border Background="#1C2230" CornerRadius="10" Margin="12,0,0,0" Padding="8,2">
+                        <TextBlock x:Name="TxtSdkStatus" Text="DAL SDK: Checking..." FontSize="11" Foreground="#FFCC00" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+                <TextBlock Text="Analog Microphone to Dante Network Bridge" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border x:Name="BadgeDanteStatus" Background="#1E232E" CornerRadius="14" Padding="14,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#78909C" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtStatus" Text="STANDBY" FontWeight="Bold" FontSize="11" Foreground="#ECEFF4"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Body Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column: Audio Device & Dante Config -->
+            <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                <!-- Device Selection Card -->
+                <Border Style="{StaticResource CardPanel}">
+                    <StackPanel>
+                        <TextBlock Text="ANALOG MICROPHONE INPUT (WASAPI Low-Latency)" Style="{StaticResource HeaderTitle}"/>
+                        
+                        <TextBlock Text="Input Capture Device:" Foreground="#9BA5B7" FontSize="12" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbDevices" Height="34" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4" Margin="0,0,0,12"/>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Sample Rate:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CmbSampleRate" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="48,000 Hz (Dante Standard)" IsSelected="True"/>
+                                    <ComboBoxItem Content="96,000 Hz (High-Res)"/>
+                                    <ComboBoxItem Content="44,100 Hz"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Bit Depth:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CmbBitDepth" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="24-bit PCM (Dante Standard)" IsSelected="True"/>
+                                    <ComboBoxItem Content="32-bit Float"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Input Preamp / Gain Slider -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Software Preamp / Digital Boost:" Foreground="#9BA5B7" FontSize="12"/>
+                            <TextBlock x:Name="TxtGainVal" Grid.Column="1" Text="2.00x (+6.0 dB)" Foreground="#00E5FF" FontWeight="SemiBold" FontSize="12"/>
+                        </Grid>
+                        <Slider x:Name="SliderGain" Minimum="0.5" Maximum="10.0" Value="2.0" TickFrequency="0.5" ValueChanged="SliderGain_ValueChanged"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Dante Stream Config Card -->
+                <Border Style="{StaticResource CardPanel}">
+                    <StackPanel>
+                        <TextBlock Text="AUDINATE DANTE TRANSMITTER CONFIGURATION" Style="{StaticResource HeaderTitle}"/>
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Dante Tx Channel Label:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtTxChannel" Text="Mic-Ch01" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Dante Device Name:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtDeviceName" Text="WPF-MicBridge" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Button x:Name="BtnStart" Content="Start Dante Stream" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0" Width="170" Click="BtnStart_Click"/>
+                            <Button x:Name="BtnStop" Content="Stop Stream" Style="{StaticResource StopButton}" Width="130" IsEnabled="False" Click="BtnStop_Click"/>
+                            <Button x:Name="BtnRefresh" Content="Refresh Devices" Background="#242B3A" Foreground="#ECEFF4" BorderThickness="0" Margin="10,0,0,0" Padding="12,9" Cursor="Hand" Click="BtnRefresh_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Right Column: VU Meters & Dante Network Status -->
+            <StackPanel Grid.Column="1">
+                <Border Style="{StaticResource CardPanel}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="REALTIME AUDIO METERS" Style="{StaticResource HeaderTitle}" Margin="0"/>
+                            <TextBlock x:Name="TxtDbReadout" Grid.Column="1" Text="-inf dB" FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
+                        </Grid>
+
+                        <!-- Meter Left -->
+                        <TextBlock Text="Channel 1 (Left / Mic)" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <ProgressBar x:Name="PbLevelL" Style="{StaticResource VuMeterStyle}" Margin="0,0,0,12"/>
+
+                        <!-- Meter Right -->
+                        <TextBlock Text="Channel 2 (Right / Auxiliary)" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <ProgressBar x:Name="PbLevelR" Style="{StaticResource VuMeterStyle}" Margin="0,0,0,14"/>
+
+                        <!-- Network Dante Broadcast Info -->
+                        <Border Background="#10131A" CornerRadius="6" Padding="12" Margin="0,4,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Dante Network Status" FontSize="11" FontWeight="SemiBold" Foreground="#00A3FF" Margin="0,0,0,4"/>
+                                <TextBlock Text="• Active input: Microphone (USBAudio2.0)" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="• Dante Controller compatible Tx multicast" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="• Clock sync: PTP v1/v2 IEEE 1588" FontSize="11" Foreground="#94A3B8"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- SDK Integration Notes -->
+                <Border Style="{StaticResource CardPanel}">
+                    <StackPanel>
+                        <TextBlock Text="DAL SDK INTEGRATION STATUS" Style="{StaticResource HeaderTitle}"/>
+                        <TextBlock x:Name="TxtSdkExplanation" TextWrapping="Wrap" FontSize="11" Foreground="#9BA5B7" LineHeight="16">
+                            dal.dll is present in the application folder. The native Dante transmitter is initialized and streaming your microphone signal.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Bottom Row: Diagnostic / Realtime Activity Log -->
+        <Border Grid.Row="2" Background="#11141D" CornerRadius="8" BorderBrush="#202636" BorderThickness="1" Padding="12" Margin="0,6,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="CONSOLE &amp; DIAGNOSTIC ACTIVITY" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,4"/>
+                <ScrollViewer Grid.Row="1" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto">
+                    <TextBox x:Name="TxtLogs" Background="Transparent" Foreground="#A0AEC0" BorderThickness="0" FontFamily="Consolas, Cascadia Code, Courier New" FontSize="11" IsReadOnly="True" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
