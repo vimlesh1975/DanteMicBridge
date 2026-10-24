@@ -1,6 +1,6 @@
 # Dante Mic Bridge — Analog Microphone to Dante Audio Desktop App
 
-A modern Windows desktop application built with **C# / .NET 8 WPF**, **WASAPI low-latency audio capture**, and an integration architecture for the **Audinate Dante Application Library (DAL)**.
+A modern Windows desktop application built with **C# / .NET 10 WPF**, **WASAPI low-latency audio capture**, and Audio-over-IP streaming (VBAN, Dante DVS, AES67, and Audinate DAL).
 
 ---
 
