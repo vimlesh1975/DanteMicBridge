@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Dante Mic Bridge - Audinate DAL Audio Transmitter" 
-        Height="740" Width="1020"
+        Title="Dante Mic Bridge - Audio-over-IP (AES67 / Dante)" 
+        Height="840" Width="1060" MinHeight="680" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="#0B0E14"
         Foreground="#ECEFF4"
@@ -113,13 +113,134 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Modern Dark ComboBoxItem Style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#161B26"/>
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="4" Margin="2,1">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#2A344A"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#007ACC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Template for ComboBox -->
+        <ControlTemplate x:Key="ComboBoxToggleButtonTemplate" TargetType="ToggleButton">
+            <Border x:Name="TemplateRoot" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                <Border x:Name="SplitBorder" Width="26" HorizontalAlignment="Right" Margin="0">
+                    <Path x:Name="Arrow" Data="M 0 0 L 4 4 L 8 0 Z" Fill="#A0AEC0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="TemplateRoot" Property="BorderBrush" Value="#007ACC"/>
+                    <Setter TargetName="Arrow" Property="Fill" Value="#FFFFFF"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="TemplateRoot" Property="BorderBrush" Value="#007ACC"/>
+                    <Setter TargetName="Arrow" Property="Fill" Value="#007ACC"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="TemplateRoot" Property="Background" Value="#121620"/>
+                    <Setter TargetName="TemplateRoot" Property="BorderBrush" Value="#252C3D"/>
+                    <Setter TargetName="Arrow" Property="Fill" Value="#4A5568"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- Global ComboBox Style with Dark Popup -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#161B26"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#2D3748"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Padding" Value="10,4,30,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid x:Name="MainGrid" SnapsToDevicePixels="true">
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Background="{TemplateBinding Background}" 
+                                          BorderBrush="{TemplateBinding BorderBrush}" 
+                                          BorderThickness="{TemplateBinding BorderThickness}" 
+                                          Focusable="false" 
+                                          IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                          ClickMode="Press" 
+                                          Template="{StaticResource ComboBoxToggleButtonTemplate}"/>
+                            <ContentPresenter x:Name="ContentSite" 
+                                              IsHitTestVisible="False" 
+                                              Content="{TemplateBinding SelectionBoxItem}" 
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                              Margin="{TemplateBinding Padding}" 
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#F8FAFC"/>
+                                        <Setter Property="FontWeight" Value="Medium"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                            <Popup x:Name="PART_Popup" 
+                                   AllowsTransparency="true" 
+                                   IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" 
+                                   Placement="Bottom" 
+                                   PopupAnimation="Slide">
+                                <Border x:Name="DropDownBorder" 
+                                        Background="#11141D" 
+                                        BorderBrush="#2D3748" 
+                                        BorderThickness="1" 
+                                        CornerRadius="6" 
+                                        Padding="4" 
+                                        Margin="0,2,0,0" 
+                                        MinWidth="{Binding ActualWidth, ElementName=MainGrid}" 
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ScrollViewer x:Name="DropDownScrollViewer" SnapsToDevicePixels="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#64748B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="16,14,16,14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="170"/>
+            <RowDefinition Height="125"/>
         </Grid.RowDefinitions>
 
         <!-- Top Header Bar -->
@@ -131,13 +252,13 @@
 
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#007ACC" CornerRadius="3" Width="8" Height="22" Margin="0,0,10,0"/>
-                    <TextBlock Text="AUDINATE DANTE APPLICATION LIBRARY (DAL)" FontSize="11" FontWeight="Bold" Foreground="#00A3FF" VerticalAlignment="Center"/>
+                    <Border Background="#00E676" CornerRadius="3" Width="8" Height="22" Margin="0,0,10,0"/>
+                    <TextBlock Text="AUDIO-OVER-IP (AoIP) / AES67 &amp; DANTE BRIDGE" FontSize="11" FontWeight="Bold" Foreground="#00E676" VerticalAlignment="Center"/>
                     <Border Background="#1C2230" CornerRadius="10" Margin="12,0,0,0" Padding="8,2">
-                        <TextBlock x:Name="TxtSdkStatus" Text="DAL SDK: Checking..." FontSize="11" Foreground="#FFCC00" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtSdkStatus" Text="AES67 Mode: Active (No License Required)" FontSize="11" Foreground="#00E676" FontWeight="SemiBold"/>
                     </Border>
                 </StackPanel>
-                <TextBlock Text="Analog Microphone to Dante Network Bridge" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
+                <TextBlock Text="Analog Microphone to AES67 / Dante Network Streamer" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -150,15 +271,16 @@
             </StackPanel>
         </Grid>
 
-        <!-- Main Body Content -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Main Body Content (Scrollable if screen resolution is low) -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,6,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Left Column: Audio Device & Dante Config -->
-            <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                <!-- Left Column: Audio Device & Dante Config -->
+                <StackPanel Grid.Column="0" Margin="0,0,14,0">
                 <!-- Device Selection Card -->
                 <Border Style="{StaticResource CardPanel}">
                     <StackPanel>
@@ -204,28 +326,55 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Dante Stream Config Card -->
+                <!-- Dante / AES67 Stream Config Card -->
                 <Border Style="{StaticResource CardPanel}">
                     <StackPanel>
-                        <TextBlock Text="AUDINATE DANTE TRANSMITTER CONFIGURATION" Style="{StaticResource HeaderTitle}"/>
+                        <TextBlock Text="AUDIO-OVER-IP (AoIP) TRANSMITTER CONFIGURATION" Style="{StaticResource HeaderTitle}"/>
                         
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+                            
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
-                                <TextBlock Text="Dante Tx Channel Label:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
-                                <TextBox x:Name="TxtTxChannel" Text="Mic-Ch01" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                                <TextBlock Text="Transmission Mode:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CmbProtocolMode" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" SelectionChanged="CmbProtocolMode_SelectionChanged">
+                                    <ComboBoxItem Content="AES67 / RTP Multicast (Free, no Dante device listing)" IsSelected="True"/>
+                                    <ComboBoxItem Content="Dante Virtual Soundcard (Shows in Dante Controller)"/>
+                                    <ComboBoxItem Content="Audinate DAL SDK (Requires Commercial License)"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Channel / Stream Name:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtTxChannel" Text="Mic-AES67" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel x:Name="PanelDvsParams" Margin="0,0,0,12" Visibility="Collapsed">
+                            <TextBlock Text="Dante Virtual Soundcard Output Device:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                            <ComboBox x:Name="CmbDvsDevice" Height="32" VerticalContentAlignment="Center"/>
+                            <TextBlock Text="Mic L/R go to DVS Tx channels 1/2. Subscribe them in Dante Controller." Foreground="#64748B" FontSize="10" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <Grid Margin="0,0,0,12" x:Name="GridAes67Params">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="AES67 Multicast IP:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtMulticastIp" Text="239.69.1.1" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="6,0,0,0">
-                                <TextBlock Text="Dante Device Name:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
-                                <TextBox x:Name="TxtDeviceName" Text="WPF-MicBridge" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                                <TextBlock Text="RTP Port:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtRtpPort" Text="5004" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
                             </StackPanel>
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                            <Button x:Name="BtnStart" Content="Start Dante Stream" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0" Width="170" Click="BtnStart_Click"/>
+                            <Button x:Name="BtnStart" Content="Start AoIP Stream" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0" Width="170" Click="BtnStart_Click"/>
                             <Button x:Name="BtnStop" Content="Stop Stream" Style="{StaticResource StopButton}" Width="130" IsEnabled="False" Click="BtnStop_Click"/>
                             <Button x:Name="BtnRefresh" Content="Refresh Devices" Background="#242B3A" Foreground="#ECEFF4" BorderThickness="0" Margin="10,0,0,0" Padding="12,9" Cursor="Hand" Click="BtnRefresh_Click"/>
                         </StackPanel>
@@ -254,13 +403,14 @@
                         <TextBlock Text="Channel 2 (Right / Auxiliary)" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
                         <ProgressBar x:Name="PbLevelR" Style="{StaticResource VuMeterStyle}" Margin="0,0,0,14"/>
 
-                        <!-- Network Dante Broadcast Info -->
+                        <!-- Network AoIP Broadcast Info -->
                         <Border Background="#10131A" CornerRadius="6" Padding="12" Margin="0,4,0,0">
                             <StackPanel>
-                                <TextBlock Text="Dante Network Status" FontSize="11" FontWeight="SemiBold" Foreground="#00A3FF" Margin="0,0,0,4"/>
-                                <TextBlock Text="• Active input: Microphone (USBAudio2.0)" FontSize="11" Foreground="#94A3B8"/>
-                                <TextBlock Text="• Dante Controller compatible Tx multicast" FontSize="11" Foreground="#94A3B8"/>
-                                <TextBlock Text="• Clock sync: PTP v1/v2 IEEE 1588" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="Network AoIP Status" FontSize="11" FontWeight="SemiBold" Foreground="#00E676" Margin="0,0,0,4"/>
+                                <TextBlock Text="• Stream: AES67 L24 Stereo Multicast" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="• Dante Controller AES67 receiver compatible" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="• SAP Announce: 224.2.127.254:9875 (SDP)" FontSize="11" Foreground="#94A3B8"/>
+                                <TextBlock Text="• PTP / RTP RFC 3550 standard clock" FontSize="11" Foreground="#94A3B8"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -269,14 +419,15 @@
                 <!-- SDK Integration Notes -->
                 <Border Style="{StaticResource CardPanel}">
                     <StackPanel>
-                        <TextBlock Text="DAL SDK INTEGRATION STATUS" Style="{StaticResource HeaderTitle}"/>
+                        <TextBlock Text="COMPATIBILITY &amp; LICENSING" Style="{StaticResource HeaderTitle}"/>
                         <TextBlock x:Name="TxtSdkExplanation" TextWrapping="Wrap" FontSize="11" Foreground="#9BA5B7" LineHeight="16">
-                            dal.dll is present in the application folder. The native Dante transmitter is initialized and streaming your microphone signal.
+                            AES67 mode is 100% royalty-free and open. In Dante Controller, enable AES67 mode on your Dante receiver devices to route this stream directly with zero license fees.
                         </TextBlock>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </Grid>
+    </ScrollViewer>
 
         <!-- Bottom Row: Diagnostic / Realtime Activity Log -->
         <Border Grid.Row="2" Background="#11141D" CornerRadius="8" BorderBrush="#202636" BorderThickness="1" Padding="12" Margin="0,6,0,0">

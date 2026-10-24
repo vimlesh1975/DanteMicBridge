@@ -8,7 +8,7 @@ namespace DanteMicBridge.Core
     public class AudioCaptureManager : IDisposable
     {
         private WasapiCapture? _capture;
-        private readonly IDanteAudioTransmitter _danteTransmitter;
+        private IDanteAudioTransmitter _danteTransmitter;
         private bool _isCapturing;
         private float _currentPeakL;
         private float _currentPeakR;
@@ -31,6 +31,11 @@ namespace DanteMicBridge.Core
             _danteTransmitter = transmitter;
         }
 
+        public void SetTransmitter(IDanteAudioTransmitter transmitter)
+        {
+            _danteTransmitter = transmitter;
+        }
+
         public static List<MMDevice> GetInputDevices()
         {
             var devices = new List<MMDevice>();
@@ -43,7 +48,7 @@ namespace DanteMicBridge.Core
             return devices;
         }
 
-        public bool StartCapture(MMDevice device, int requestedSampleRate = 48000)
+        public bool StartCapture(MMDevice device, int requestedSampleRate = 48000, Func<int, bool>? initTransmitter = null)
         {
             StopCapture();
 
@@ -71,7 +76,16 @@ namespace DanteMicBridge.Core
                     }
                 };
 
-                _danteTransmitter.Initialize("Mic-In", requestedSampleRate, 24);
+                bool txOk = initTransmitter != null
+                    ? initTransmitter(wf.SampleRate)
+                    : _danteTransmitter.Initialize("Mic-In", wf.SampleRate, 24);
+                if (!txOk)
+                {
+                    OnLog?.Invoke("[Transmitter] Failed to initialize output; capture not started.");
+                    _capture.Dispose();
+                    _capture = null;
+                    return false;
+                }
                 _capture.StartRecording();
                 _isCapturing = true;
                 OnLog?.Invoke($"[WASAPI] Streaming active and capturing.");

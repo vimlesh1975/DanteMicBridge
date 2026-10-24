@@ -19,27 +19,17 @@ A modern Windows desktop application built with **C# / .NET 8 WPF**, **WASAPI lo
 
 ---
 
-## 2. Audinate DAL SDK Integration Details
+## 2. Audio-over-IP Protocols & Licensing
 
-### How Audinate DAL Works:
-The Audinate Dante Application Library (DAL) is proprietary software distributed by Audinate to licensed partners. It provides:
-1. `dal.dll` / `dal.lib`
-2. `dal.h` (C headers)
-3. An OEM license token required during initialization.
+### Route 1: AES67 Mode (100% Free & Open Standard — Enabled by Default)
+- **Zero License Fees**: Operates using standard RTP (RFC 3550) multicast packets with L24 uncompressed audio.
+- **Direct Dante Compatibility**: Standard Dante hardware endpoints (mixers, stage boxes, DSPs, amps) support AES67 mode. In **Audinate Dante Controller**, simply double-click the receiver device, navigate to the **AES67 Config** tab, and enable AES67 mode.
+- **Automatic Discovery via SAP**: Broadcasts Session Announcement Protocol (SAP) and SDP packets to `224.2.127.254:9875` every 3 seconds, making the stream visible to AES67-aware Dante devices and software.
+- **Multicast Default**: IP `239.69.1.1`, Port `5004`, 48kHz, 24-bit stereo.
 
-### Where to Place the SDK Files:
-When you obtain access to the Dante Application Library from the Audinate Developer Portal:
-1. Copy `dal.dll` into the output directory:
-   `DanteMicBridge\bin\Debug\net8.0-windows\` (or publish root).
-2. Open [DanteDalTransmitter.cs](file:///d:/_projects/danteaudio/DanteMicBridge/Core/DanteDalTransmitter.cs) and provide your license token in `config.license_token`.
-3. Launch the app. The SDK status badge will turn green (`DAL SDK: Native dal.dll Active`), and your microphone stream will appear directly in **Audinate Dante Controller**.
-
----
-
-## 3. Alternative without Commercial DAL (Immediate Options):
-If you do not have an active Audinate OEM agreement:
-1. **Dante Virtual Soundcard (DVS)**: Audinate sells a standalone virtual driver (~$30–$50). When installed, any WASAPI/ASIO app can route microphone audio straight into Dante networks without writing custom C/C++ native network code.
-2. **Dante Via**: Automatically detects desktop audio inputs and advertises them as Dante channels on your local network.
+### Route 2: Audinate DAL SDK (Commercial OEM License)
+- For native proprietary Dante unicast/multicast without AES67 mode, Audinate requires the commercial Dante Application Library (`dal.dll`) and an OEM license token.
+- You can switch to this mode at any time using the "Transmission Mode" dropdown in the app.
 
 ---
 
