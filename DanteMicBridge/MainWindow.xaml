@@ -340,15 +340,32 @@
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
                                 <TextBlock Text="Transmission Mode:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="CmbProtocolMode" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" SelectionChanged="CmbProtocolMode_SelectionChanged">
-                                    <ComboBoxItem Content="AES67 / RTP Multicast (Free, no Dante device listing)" IsSelected="True"/>
+                                    <ComboBoxItem Content="VBAN LAN Direct (100% Free: Speak on PC1 -> Hear on PC2)" IsSelected="True"/>
                                     <ComboBoxItem Content="Dante Virtual Soundcard (Shows in Dante Controller)"/>
-                                    <ComboBoxItem Content="Audinate DAL SDK (Requires Commercial License)"/>
+                                    <ComboBoxItem Content="AES67 / RTP Multicast (Open AoIP Standard)"/>
+                                    <ComboBoxItem Content="Audinate DAL SDK (Commercial License)"/>
                                 </ComboBox>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                 <TextBlock Text="Channel / Stream Name:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
-                                <TextBox x:Name="TxtTxChannel" Text="Mic-AES67" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                                <TextBox x:Name="TxtTxChannel" Text="Stream1" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- VBAN Configuration Panel -->
+                        <Grid Margin="0,0,0,12" x:Name="PanelVbanParams">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Target IP (e.g. 255.255.255.255 for broadcast or PC 2's IP):" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtVbanIp" Text="255.255.255.255" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="VBAN UDP Port:" Foreground="#9BA5B7" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBox x:Name="TxtVbanPort" Text="6980" Height="32" Background="#1B202C" Foreground="#ECEFF4" BorderBrush="#30384D" VerticalContentAlignment="Center" Padding="8,4"/>
                             </StackPanel>
                         </Grid>
 
@@ -358,7 +375,7 @@
                             <TextBlock Text="Mic L/R go to DVS Tx channels 1/2. Subscribe them in Dante Controller." Foreground="#64748B" FontSize="10" Margin="0,4,0,0"/>
                         </StackPanel>
 
-                        <Grid Margin="0,0,0,12" x:Name="GridAes67Params">
+                        <Grid Margin="0,0,0,12" x:Name="GridAes67Params" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="*"/>

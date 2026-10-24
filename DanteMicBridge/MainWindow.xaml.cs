@@ -12,6 +12,7 @@ namespace DanteMicBridge
         private readonly DanteDalTransmitter _danteTransmitter;
         private readonly Aes67AudioTransmitter _aes67Transmitter;
         private readonly DvsAudioTransmitter _dvsTransmitter;
+        private readonly VbanAudioTransmitter _vbanTransmitter;
         private List<MMDevice> _dvsDevices = new List<MMDevice>();
         private IDanteAudioTransmitter _activeTransmitter;
         private readonly AudioCaptureManager _audioManager;
@@ -19,6 +20,9 @@ namespace DanteMicBridge
 
         public MainWindow()
         {
+            _vbanTransmitter = new VbanAudioTransmitter();
+            _vbanTransmitter.OnLog += LogMessage;
+
             _aes67Transmitter = new Aes67AudioTransmitter();
             _aes67Transmitter.OnLog += LogMessage;
 
@@ -28,8 +32,8 @@ namespace DanteMicBridge
             _danteTransmitter = new DanteDalTransmitter();
             _danteTransmitter.OnLog += LogMessage;
 
-            // Default to AES67 (Free / No License required)
-            _activeTransmitter = _aes67Transmitter;
+            // Default to VBAN (100% Free PC-to-PC Audio over LAN)
+            _activeTransmitter = _vbanTransmitter;
 
             _audioManager = new AudioCaptureManager(_activeTransmitter);
             _audioManager.InputGain = 2.0f; // Default healthy preamp boost
@@ -46,67 +50,88 @@ namespace DanteMicBridge
         {
             UpdateTransmitterModeUI();
             LoadAudioDevices();
-            LogMessage("[System] Application initialized in AES67 (License-Free Dante compatible) mode.");
+            LogMessage("[System] Application initialized in VBAN LAN Direct mode (100% Free PC-to-PC).");
         }
 
         private void CmbProtocolMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (CmbProtocolMode == null || _aes67Transmitter == null || _audioManager == null) return;
+            if (CmbProtocolMode == null || _vbanTransmitter == null || _audioManager == null) return;
             UpdateTransmitterModeUI();
         }
 
         private void UpdateTransmitterModeUI()
         {
-            if (CmbProtocolMode == null || _audioManager == null || _aes67Transmitter == null || _danteTransmitter == null || _dvsTransmitter == null) return;
+            if (CmbProtocolMode == null || _audioManager == null || _vbanTransmitter == null || _aes67Transmitter == null || _danteTransmitter == null || _dvsTransmitter == null) return;
 
-            if (GridAes67Params != null) GridAes67Params.Visibility = CmbProtocolMode.SelectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (PanelVbanParams != null) PanelVbanParams.Visibility = CmbProtocolMode.SelectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
             if (PanelDvsParams != null) PanelDvsParams.Visibility = CmbProtocolMode.SelectedIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+            if (GridAes67Params != null) GridAes67Params.Visibility = CmbProtocolMode.SelectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+
+            if (CmbProtocolMode.SelectedIndex == 0) // VBAN Direct LAN
+            {
+                _activeTransmitter = _vbanTransmitter;
+                _audioManager.SetTransmitter(_activeTransmitter);
+                if (TxtSdkStatus != null)
+                {
+                    TxtSdkStatus.Text = "VBAN Direct: 100% Free (No License Required)";
+                    TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                }
+                if (TxtSdkExplanation != null)
+                {
+                    TxtSdkExplanation.Text = "Microphone broadcasts over your local Wi-Fi/LAN directly to PC 2. On PC 2, open free VBAN Receptor to hear your voice immediately through PC 2's speakers!";
+                }
+                return;
+            }
 
             if (CmbProtocolMode.SelectedIndex == 1) // Dante Virtual Soundcard
             {
                 _activeTransmitter = _dvsTransmitter;
                 _audioManager.SetTransmitter(_activeTransmitter);
                 LoadDvsDevices();
-                TxtSdkStatus.Text = "DVS Mode: Appears in Dante Controller";
-                TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 163, 255));
-                TxtSdkExplanation.Text = "Requires Dante Virtual Soundcard (Audinate, paid, 14-day trial) installed and started. This PC then shows up in Dante Controller; route its Tx channels 1/2 to any receiver.";
+                if (TxtSdkStatus != null)
+                {
+                    TxtSdkStatus.Text = "DVS Mode: Appears in Dante Controller";
+                    TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 163, 255));
+                }
+                if (TxtSdkExplanation != null)
+                {
+                    TxtSdkExplanation.Text = "Requires Dante Virtual Soundcard installed and started. This PC shows up in Dante Controller; route Tx channels 1/2 to any receiver.";
+                }
                 return;
             }
 
-            if (CmbProtocolMode.SelectedIndex == 0) // AES67
+            if (CmbProtocolMode.SelectedIndex == 2) // AES67
             {
                 _activeTransmitter = _aes67Transmitter;
                 _audioManager.SetTransmitter(_activeTransmitter);
-                if (GridAes67Params != null) GridAes67Params.Visibility = Visibility.Visible;
                 if (TxtSdkStatus != null)
                 {
-                    TxtSdkStatus.Text = "AES67 Mode: 100% Free / Open Standard";
+                    TxtSdkStatus.Text = "AES67 Mode: Open Multicast Standard";
                     TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
                 }
                 if (TxtSdkExplanation != null)
                 {
-                    TxtSdkExplanation.Text = "AES67 RTP Multicast active. Zero Audinate license fees required. Supported natively by Dante devices with AES67 mode enabled in Dante Controller, Ravenna, and Livewire.";
+                    TxtSdkExplanation.Text = "AES67 RTP Multicast active. Supported by hardware Dante devices with AES67 mode enabled in Dante Controller.";
                 }
+                return;
             }
-            else // DAL SDK
+
+            // DAL SDK
+            _activeTransmitter = _danteTransmitter;
+            _audioManager.SetTransmitter(_activeTransmitter);
+            if (TxtSdkStatus != null)
             {
-                _activeTransmitter = _danteTransmitter;
-                _audioManager.SetTransmitter(_activeTransmitter);
-                if (GridAes67Params != null) GridAes67Params.Visibility = Visibility.Collapsed;
-                if (TxtSdkStatus != null)
+                if (_danteTransmitter.IsSdkAvailable)
                 {
-                    if (_danteTransmitter.IsSdkAvailable)
-                    {
-                        TxtSdkStatus.Text = "DAL SDK: Native dal.dll Active";
-                        TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                        TxtSdkExplanation.Text = "Audinate Dante Application Library (dal.dll) detected and active! Audio is marshalled into the native Dante driver.";
-                    }
-                    else
-                    {
-                        TxtSdkStatus.Text = "DAL SDK: License / dal.dll Missing";
-                        TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(255, 204, 0));
-                        TxtSdkExplanation.Text = "Audinate requires a commercial OEM license and dal.dll. Switch back to AES67 mode for free, zero-license streaming.";
-                    }
+                    TxtSdkStatus.Text = "DAL SDK: Native dal.dll Active";
+                    TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    TxtSdkExplanation.Text = "Audinate Dante Application Library (dal.dll) detected and active!";
+                }
+                else
+                {
+                    TxtSdkStatus.Text = "DAL SDK: License / dal.dll Missing";
+                    TxtSdkStatus.Foreground = new SolidColorBrush(Color.FromRgb(255, 204, 0));
+                    TxtSdkExplanation.Text = "Audinate requires a commercial OEM license and dal.dll. Switch to VBAN for free, permanent PC-to-PC audio.";
                 }
             }
         }
@@ -186,6 +211,12 @@ namespace DanteMicBridge
 
             Func<int, bool> initTx = captureRate =>
             {
+                if (_activeTransmitter is VbanAudioTransmitter vban)
+                {
+                    string targetIp = string.IsNullOrWhiteSpace(TxtVbanIp.Text) ? "255.255.255.255" : TxtVbanIp.Text.Trim();
+                    int port = int.TryParse(TxtVbanPort.Text, out int p) ? p : 6980;
+                    return vban.Initialize(channel, captureRate, 16, targetIp, port);
+                }
                 if (_activeTransmitter is Aes67AudioTransmitter aesTransmitter)
                 {
                     string mcastIp = string.IsNullOrWhiteSpace(TxtMulticastIp.Text) ? "239.69.1.1" : TxtMulticastIp.Text.Trim();
